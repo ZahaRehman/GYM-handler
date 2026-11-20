@@ -73,7 +73,10 @@ Time needed: about 45–60 minutes the first time.
 5. Optional: Custom domains → `admin.yourgym.com` (free HTTPS).
 6. Put the final URL into Supabase → Authentication → URL Configuration → Site URL.
 
-`apps/web/public/_redirects` (single-page app routing) and `_headers` (security + caching) are picked up automatically.
+**As deployed:** Cloudflare now offers the *Workers* flow first. That is used here (also free): `apps/web/wrangler.jsonc` serves `dist/` as static assets with single-page-app routing.
+In the Workers setup screen: Build command `pnpm install --frozen-lockfile && pnpm build`, Deploy command `npx wrangler deploy`, Advanced settings → Path `apps/web`, and add the variables above (plus `NODE_VERSION=22`) as **build variables**.
+
+`apps/web/public/_headers` (security + caching) is picked up automatically.
 
 ## 5. GitHub Actions: keep-alive and backups (5 min)
 Repo → Settings → Secrets and variables → Actions.

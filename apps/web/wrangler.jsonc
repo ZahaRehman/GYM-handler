@@ -1,0 +1,11 @@
+// Cloudflare Workers (static assets only, free plan). No server code: the app talks to Supabase directly.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gym-handler",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    // single-page app: unknown paths like /members/123 serve index.html
+    "not_found_handling": "single-page-application"
+  }
+}
