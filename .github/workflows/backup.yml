@@ -1,0 +1,40 @@
+name: weekly-backup
+# Weekly full database backup, encrypted with BACKUP_PASSPHRASE, kept 90 days as a workflow artifact.
+# Restore: see docs/08-deployment.md, "Restoring a backup".
+on:
+  schedule:
+    - cron: '0 21 * * 6' # Saturday 21:00 UTC = Sunday 02:00 PKT
+  workflow_dispatch:
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    if: ${{ vars.SUPABASE_URL != '' }}
+    steps:
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Dump schema and data
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          supabase db dump --db-url "$DB_URL" -f schema.sql
+          supabase db dump --db-url "$DB_URL" -f data.sql --data-only
+          cat schema.sql data.sql > "backup_$(date -u +%F).sql"
+          rm schema.sql data.sql
+      - name: Encrypt (member data must never sit in plain text)
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          test -n "$BACKUP_PASSPHRASE" || { echo "BACKUP_PASSPHRASE secret is not set"; exit 1; }
+          for f in backup_*.sql; do
+            gzip -9 "$f"
+            gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 "$f.gz"
+            rm "$f.gz"
+          done
+          ls -la
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup
+          path: backup_*.sql.gz.gpg
+          retention-days: 90

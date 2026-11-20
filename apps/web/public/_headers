@@ -1,0 +1,19 @@
+# Cloudflare Pages headers
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), microphone=(), geolocation=()
+  X-Robots-Tag: noindex, nofollow
+
+# Always check for a new app version
+/sw.js
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: no-cache
+
+# Hashed files never change
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
