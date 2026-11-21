@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PageHeader } from '@/components/shared/PageHeader'
 import { DataCard } from '@/features/data/components/DataCard'
 import { useGymToday } from '@/features/members/hooks'
-import { PlansCard } from '@/features/plans/components/PlansCard'
 import { GymProfileCard } from '../components/GymProfileCard'
 import { MessagesCard } from '../components/MessagesCard'
 import { RemindersCard } from '../components/RemindersCard'
@@ -15,7 +14,6 @@ export function SettingsPage() {
       <PageHeader title="Settings" />
       <div className="space-y-6">
         <GymProfileCard />
-        <PlansCard />
         <RemindersCard />
         <MessagesCard />
         <DataCard today={today} />

@@ -125,7 +125,6 @@ export function MembersPage() {
                 <TableRow>
                   <TableHead className="pl-4">Member</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Plan</TableHead>
                   <TableHead className="text-right">Fee</TableHead>
                   <TableHead>Next due</TableHead>
                   <TableHead className="pr-4">Status</TableHead>
@@ -144,7 +143,6 @@ export function MembersPage() {
                       </Link>
                     </TableCell>
                     <TableCell className="tabular-nums">{formatPhone(m.phone)}</TableCell>
-                    <TableCell>{m.plan?.name ?? <span className="text-muted-foreground">No plan</span>}</TableCell>
                     <TableCell className="text-right tabular-nums">{formatMoney(m.fee_amount, currency)}</TableCell>
                     <TableCell className="tabular-nums">{formatDate(m.next_due_date)}</TableCell>
                     <TableCell className="pr-4"><DueBadge info={due(m)} /></TableCell>

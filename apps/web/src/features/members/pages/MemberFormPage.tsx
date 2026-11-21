@@ -6,7 +6,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { MemberForm } from '../components/MemberForm'
-import { usePlans } from '@/features/plans/hooks'
 import { useGymToday, useMember, useRegisterMember, useUpdateMember } from '../hooks'
 import { toFormValues, toMemberPayload, type MemberFormValues } from '../schema'
 
@@ -17,7 +16,6 @@ export function MemberFormPage() {
   const { today, currency } = useGymToday()
   const member = useMember(id)
   const create = useRegisterMember()
-  const { data: plans = [] } = usePlans()
   const update = useUpdateMember()
 
   const back = (
@@ -36,16 +34,14 @@ export function MemberFormPage() {
   const defaults: MemberFormValues = member.data
     ? toFormValues(member.data)
     : {
-        full_name: '', phone: '', gender: '', date_of_birth: '', address: '', cnic: '',
-        emergency_contact_name: '', emergency_contact_phone: '', plan_id: '', fee_amount: Number.NaN,
+        full_name: '', phone: '', gender: '', date_of_birth: '', address: '', fee_amount: Number.NaN,
         join_date: today, next_due_date: today, notes: '', photo_public_id: null,
         collect_payment: true, payment_method: 'cash', admission_fee: Number.NaN,
       }
 
   const onSubmit = (values: MemberFormValues) => {
     if (isNew) {
-      const planMonths = plans.find((p) => p.id === values.plan_id)?.duration_months ?? 1
-      create.mutate({ values, planMonths }, {
+      create.mutate({ values, planMonths: 1 }, {
         onSuccess: ({ member: m, warnings }) => {
           toast.success(`${m.full_name} added (#${m.member_code})`, {
             action: { label: 'Add another', onClick: () => navigate('/members/new') },

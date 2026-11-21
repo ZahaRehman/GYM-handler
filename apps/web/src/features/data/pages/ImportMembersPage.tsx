@@ -10,7 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { PageHeader } from '@/components/shared/PageHeader'
 import { useGymToday } from '@/features/members/hooks'
 import { formatPhone } from '@/features/members/utils'
-import { usePlans } from '@/features/plans/hooks'
 import { downloadCsv, toCsv } from '@/lib/csv'
 import { formatDate, formatMoney } from '@/lib/format'
 import { queryKeys } from '@/lib/queryKeys'
@@ -23,7 +22,6 @@ export function ImportMembersPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const { today, currency } = useGymToday()
-  const { data: plans = [] } = usePlans()
   const fileRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [rows, setRows] = useState<ImportRow[] | null>(null)
@@ -58,7 +56,7 @@ export function ImportMembersPage() {
         }
         try {
           const existingPhones = await fetchExistingPhones()
-          setRows(validateRows(res.data, { plans, existingPhones, today }))
+          setRows(validateRows(res.data, { existingPhones, today }))
         } catch (e) {
           toast.error((e as Error).message)
         }
@@ -100,8 +98,7 @@ export function ImportMembersPage() {
           <CardContent className="space-y-3 text-sm">
             <Button variant="outline" onClick={downloadTemplate}><Download /> Download template</Button>
             <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-              <li><b>full_name</b> and <b>phone</b> are required. Phones like 0300 1234567 are fine.</li>
-              <li><b>plan</b> must match a plan name in Settings ({plans.map((p) => p.name).join(', ') || 'none yet'}). Leave <b>fee</b> empty to use the plan price.</li>
+              <li><b>full_name</b>, <b>phone</b> and <b>fee</b> (monthly) are required. Phones like 0300 1234567 are fine.</li>
               <li><b>next_due_date</b>: when they must pay next. Dates like 31/01/2026 or 2026-01-31 both work.</li>
               <li>Members whose phone already exists are skipped, so importing the same file twice is safe.</li>
             </ul>
@@ -144,7 +141,7 @@ export function ImportMembersPage() {
                   <Table>
                     <TableHeader><TableRow>
                       <TableHead className="pl-4 sm:pl-2">Row</TableHead><TableHead>Name</TableHead><TableHead>Phone</TableHead>
-                      <TableHead>Plan</TableHead><TableHead className="text-right">Fee</TableHead><TableHead>Next due</TableHead><TableHead>Note</TableHead>
+<TableHead className="text-right">Fee</TableHead><TableHead>Next due</TableHead><TableHead>Note</TableHead>
                     </TableRow></TableHeader>
                     <TableBody>
                       {ready.slice(0, 50).map((r) => (
@@ -152,7 +149,6 @@ export function ImportMembersPage() {
                           <TableCell className="pl-4 text-muted-foreground sm:pl-2">{r.line}</TableCell>
                           <TableCell className="font-medium">{r.payload!.full_name}</TableCell>
                           <TableCell className="tabular-nums">{formatPhone(r.payload!.phone)}</TableCell>
-                          <TableCell>{plans.find((p) => p.id === r.payload!.plan_id)?.name}</TableCell>
                           <TableCell className="text-right tabular-nums">{formatMoney(r.payload!.fee_amount, currency)}</TableCell>
                           <TableCell>{formatDate(r.payload!.next_due_date)}</TableCell>
                           <TableCell className="text-xs text-amber-700 dark:text-amber-400">{r.warnings.join('; ')}</TableCell>

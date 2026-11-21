@@ -12,8 +12,6 @@ import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { FormField } from '@/components/shared/FormField'
-import { usePlans } from '@/features/plans/hooks'
-import { durationLabel } from '@/features/plans/schema'
 import { addMonthsISO } from '@/lib/dates'
 import { formatDate, formatMoney } from '@/lib/format'
 import { methodLabels, paymentMethods } from '@/features/payments/schema'
@@ -31,33 +29,23 @@ export function MemberForm({ defaultValues, isNew, submitting, currency, onSubmi
   onSubmit: (values: MemberFormValues) => void
   onCancel: () => void
 }) {
-  const { data: plans = [] } = usePlans()
   const form = useForm<MemberFormValues>({ resolver: zodResolver(memberFormSchema), defaultValues })
   const { errors, isDirty, dirtyFields, isSubmitSuccessful } = form.formState
   const { register, setValue, control } = form
 
-  const [planId, joinDate, fee, fullName, collect, admission] = useWatch({ control, name: ['plan_id', 'join_date', 'fee_amount', 'full_name', 'collect_payment', 'admission_fee'] })
-  const plan = plans.find((p) => p.id === planId)
-  const selectablePlans = plans.filter((p) => p.is_active || p.id === defaultValues.plan_id)
-
-  // Plan changed: prefill the fee.
-  useEffect(() => {
-    if (plan && dirtyFields.plan_id && !dirtyFields.fee_amount) setValue('fee_amount', plan.price, { shouldValidate: true })
-  }, [plan, dirtyFields.plan_id, dirtyFields.fee_amount, setValue])
+  const [joinDate, fee, fullName, collect, admission] = useWatch({ control, name: ['join_date', 'fee_amount', 'full_name', 'collect_payment', 'admission_fee'] })
 
   // New member not paying now: due on the join date unless changed by hand.
   useEffect(() => {
     if (isNew && !dirtyFields.next_due_date && joinDate) setValue('next_due_date', joinDate, { shouldValidate: true })
   }, [isNew, joinDate, dirtyFields.next_due_date, setValue])
 
-  const dueAfterPayment = plan && joinDate ? addMonthsISO(joinDate, plan.duration_months) : null
+  const dueAfterPayment = joinDate ? addMonthsISO(joinDate, 1) : null
   const feeOk = typeof fee === 'number' && !Number.isNaN(fee)
   const firstTotal = (feeOk ? fee : 0) + (typeof admission === 'number' && !Number.isNaN(admission) ? admission : 0)
 
   const blocker = useBlocker(({ currentLocation, nextLocation }) =>
     isDirty && !isSubmitSuccessful && !submitting && currentLocation.pathname !== nextLocation.pathname)
-
-  const discount = plan && typeof fee === 'number' && !Number.isNaN(fee) && fee < plan.price ? plan.price - fee : 0
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-6 pb-20">
@@ -92,9 +80,6 @@ export function MemberForm({ defaultValues, isNew, submitting, currency, onSubmi
           <FormField id="date_of_birth" label="Date of birth" error={errors.date_of_birth?.message}>
             <Input id="date_of_birth" type="date" className={field} {...register('date_of_birth')} />
           </FormField>
-          <FormField id="cnic" label="CNIC / ID number">
-            <Input id="cnic" className={field} inputMode="numeric" placeholder="optional" {...register('cnic')} />
-          </FormField>
           <div className="sm:col-span-2">
             <FormField id="address" label="Address">
               <Input id="address" className={field} {...register('address')} />
@@ -104,35 +89,9 @@ export function MemberForm({ defaultValues, isNew, submitting, currency, onSubmi
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Emergency contact</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Fee</CardTitle></CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <FormField id="emergency_contact_name" label="Name">
-            <Input id="emergency_contact_name" className={field} {...register('emergency_contact_name')} />
-          </FormField>
-          <FormField id="emergency_contact_phone" label="Phone" error={errors.emergency_contact_phone?.message}>
-            <Input id="emergency_contact_phone" type="tel" inputMode="tel" className={field} {...register('emergency_contact_phone')} />
-          </FormField>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Membership & fee</CardTitle>
-          <CardDescription>The plan sets the default fee. Change the fee for discounts.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <FormField id="plan_id" label="Plan" error={errors.plan_id?.message} required>
-            <NativeSelect id="plan_id" className={select} {...register('plan_id')} aria-invalid={!!errors.plan_id}>
-              <NativeSelectOption value="">Choose a plan…</NativeSelectOption>
-              {selectablePlans.map((p) => (
-                <NativeSelectOption key={p.id} value={p.id}>
-                  {p.name} — {formatMoney(p.price, currency)} / {durationLabel(p.duration_months)}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </FormField>
-          <FormField id="fee_amount" label={`Fee (${currency})`} error={errors.fee_amount?.message} required
-            hint={discount ? `Discount of ${formatMoney(discount, currency)} on ${plan?.name}` : plan ? `Per ${durationLabel(plan.duration_months)}` : undefined}>
+          <FormField id="fee_amount" label={`Monthly fee (${currency})`} error={errors.fee_amount?.message} required>
             <Input id="fee_amount" type="number" inputMode="decimal" min={0} className={field} {...register('fee_amount', { valueAsNumber: true })} aria-invalid={!!errors.fee_amount} />
           </FormField>
           <FormField id="join_date" label="Join date" error={errors.join_date?.message} required>

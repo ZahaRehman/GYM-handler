@@ -11,7 +11,6 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { PaymentHistory } from '@/features/payments/components/PaymentHistory'
 import { RecordPaymentDialog } from '@/features/payments/components/RecordPaymentDialog'
-import { durationLabel } from '@/features/plans/schema'
 import { MemberReminders } from '@/features/reminders/components/MemberReminders'
 import { kindForDays, renderMemberMessage, templateFor } from '@/features/reminders/message'
 import { useSettings } from '@/features/settings/hooks'
@@ -100,9 +99,9 @@ export function MemberDetailPage() {
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <Card size="sm"><CardContent>
-          <p className="text-xs text-muted-foreground">Plan & fee</p>
+          <p className="text-xs text-muted-foreground">Fee</p>
           <p className="mt-1 font-semibold tabular-nums">{formatMoney(m.fee_amount, currency)}</p>
-          <p className="text-xs text-muted-foreground">{m.plan ? `${m.plan.name} · per ${durationLabel(m.plan.duration_months)}` : 'No plan'}</p>
+          <p className="text-xs text-muted-foreground">per month</p>
         </CardContent></Card>
         <Card size="sm"><CardContent>
           <p className="flex items-center gap-1 text-xs text-muted-foreground"><CalendarClock className="size-3.5" /> Next due date</p>
@@ -127,14 +126,10 @@ export function MemberDetailPage() {
             <Detail label="Phone">{formatPhone(m.phone)}</Detail>
             <Detail label="Gender">{m.gender ? genderLabel[m.gender] : null}</Detail>
             <Detail label="Date of birth">{m.date_of_birth ? formatDate(m.date_of_birth) : null}</Detail>
-            <Detail label="CNIC / ID">{m.cnic}</Detail>
             <Detail label="Address">{m.address}</Detail>
           </dl></CardContent></Card>
-          <Card><CardHeader><CardTitle>Emergency contact & notes</CardTitle></CardHeader><CardContent><dl className="divide-y">
-            <Detail label="Name">{m.emergency_contact_name}</Detail>
-            <Detail label="Phone">{m.emergency_contact_phone ? formatPhone(m.emergency_contact_phone) : null}</Detail>
-          </dl>
-            <p className="mt-3 text-sm whitespace-pre-wrap text-muted-foreground">{m.notes || 'No notes.'}</p>
+          <Card><CardHeader><CardTitle>Notes</CardTitle></CardHeader><CardContent>
+            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{m.notes || 'No notes.'}</p>
           </CardContent></Card>
         </TabsContent>
         <TabsContent value="payments" className="mt-3">

@@ -1,24 +1,21 @@
 import { isValid, parse as parseDate, format } from 'date-fns'
 import type { MemberInsert } from '@/features/members/schema'
 import { normalizePhone } from '@/features/members/utils'
-import type { Plan } from '@/features/plans/schema'
 
-/** Columns in the downloadable template, in order. Only name and phone are required. */
-export const TEMPLATE_HEADERS = ['full_name', 'phone', 'plan', 'fee', 'join_date', 'next_due_date', 'gender', 'address', 'cnic', 'notes'] as const
+/** Columns in the downloadable template, in order. Name, phone and monthly fee are required. */
+export const TEMPLATE_HEADERS = ['full_name', 'phone', 'fee', 'join_date', 'next_due_date', 'gender', 'address', 'notes'] as const
 
-export const TEMPLATE_EXAMPLE = ['Ali Raza', '0300 1234567', 'Monthly', '3000', '2026-01-15', '2026-12-15', 'male', 'Model Town, Lahore', '', 'Trains evenings']
+export const TEMPLATE_EXAMPLE = ['Ali Raza', '0300 1234567', '3000', '2026-01-15', '2026-12-15', 'male', 'Model Town, Lahore', 'Trains evenings']
 
 // Accept common header spellings from existing spreadsheets.
 const ALIASES: Record<string, (typeof TEMPLATE_HEADERS)[number]> = {
   name: 'full_name', full_name: 'full_name', fullname: 'full_name', member: 'full_name', member_name: 'full_name',
   phone: 'phone', mobile: 'phone', whatsapp: 'phone', contact: 'phone', phone_number: 'phone', number: 'phone',
-  plan: 'plan', package: 'plan', membership: 'plan',
   fee: 'fee', fees: 'fee', amount: 'fee', monthly_fee: 'fee',
   join_date: 'join_date', joined: 'join_date', joining_date: 'join_date', start_date: 'join_date', date_joined: 'join_date',
   next_due_date: 'next_due_date', due_date: 'next_due_date', due: 'next_due_date', next_due: 'next_due_date',
   gender: 'gender', sex: 'gender',
   address: 'address',
-  cnic: 'cnic', id: 'cnic', id_number: 'cnic',
   notes: 'notes', note: 'notes', remarks: 'notes',
 }
 
@@ -50,10 +47,9 @@ export type ImportRow = {
 
 export function validateRows(
   records: Record<string, string>[],
-  ctx: { plans: Plan[]; existingPhones: Set<string>; today: string },
+  ctx: { existingPhones: Set<string>; today: string },
 ): ImportRow[] {
   const seen = new Set<string>()
-  const activePlans = ctx.plans.filter((p) => p.is_active)
   return records.map((rec, i) => {
     const get = (k: (typeof TEMPLATE_HEADERS)[number]) => (rec[k] ?? '').trim()
     const errors: string[] = []
@@ -68,18 +64,9 @@ export function validateRows(
     else if (seen.has(phone)) errors.push('Same phone appears twice in the file')
     if (phone) seen.add(phone)
 
-    let plan = null as Plan | null
-    if (get('plan')) {
-      plan = ctx.plans.find((p) => p.name.trim().toLowerCase() === get('plan').toLowerCase()) ?? null
-      if (!plan) errors.push(`Unknown plan "${get('plan')}" (have: ${ctx.plans.map((p) => p.name).join(', ')})`)
-    } else if (activePlans.length === 1) {
-      plan = activePlans[0]
-    } else {
-      errors.push('Plan is missing')
-    }
-
-    let fee = plan?.price ?? NaN
-    if (get('fee')) {
+    let fee = NaN
+    if (!get('fee')) errors.push('Fee is missing')
+    else {
       fee = Number(get('fee').replace(/[^0-9.]/g, ''))
       if (!Number.isFinite(fee) || fee < 0) errors.push(`Fee "${get('fee')}" is not a number`)
     }
@@ -107,13 +94,11 @@ export function validateRows(
     const payload = errors.length ? null : {
       full_name: name,
       phone: phone!,
-      plan_id: plan?.id ?? null,
       fee_amount: fee,
       join_date: join,
       next_due_date: due,
       gender: gender as MemberInsert['gender'],
       address: get('address') || null,
-      cnic: get('cnic') || null,
       notes: get('notes') || null,
     }
     return { line: i + 2, name: name || '(no name)', payload, errors, warnings }

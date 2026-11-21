@@ -141,20 +141,12 @@ export function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader><CardTitle>By payment method</CardTitle></CardHeader>
               <CardContent>
                 {isPending ? <Skeleton className="h-40 w-full" /> : (
                   <RankedBars currency={currency} rows={(data?.by_method ?? []).map((x) => ({ label: methodLabels[x.method], value: x.total, sub: `${x.payments} payments` }))} />
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle>Membership fees by plan</CardTitle></CardHeader>
-              <CardContent>
-                {isPending ? <Skeleton className="h-40 w-full" /> : (
-                  <RankedBars currency={currency} rows={(data?.by_plan ?? []).map((x) => ({ label: x.plan, value: x.total, sub: `${x.payments} payments` }))} />
                 )}
               </CardContent>
             </Card>
