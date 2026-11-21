@@ -18,8 +18,8 @@ export function DataCard({ today }: { today: string }) {
       if (kind === 'members') {
         const rows = await exportAllMembers()
         downloadCsv(`members_${today}.csv`, toCsv(
-          ['Member #', 'Name', 'Phone', 'Status', 'Monthly fee', 'Join date', 'Next due date', 'Gender', 'Date of birth', 'Address', 'Notes'],
-          rows.map((m) => [m.member_code, m.full_name, formatPhone(m.phone), m.status, m.fee_amount, m.join_date, m.next_due_date, m.gender, m.date_of_birth, m.address, m.notes]),
+          ['Member #', 'Name', 'Phone', 'Status', 'Monthly fee', 'Join date', 'Next due date', 'Gender', 'Notes'],
+          rows.map((m) => [m.member_code, m.full_name, formatPhone(m.phone), m.status, m.fee_amount, m.join_date, m.next_due_date, m.gender, m.notes]),
         ))
       } else {
         const rows = await exportAllPayments()

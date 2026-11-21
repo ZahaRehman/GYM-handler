@@ -125,8 +125,6 @@ export function MemberDetailPage() {
           <Card><CardHeader><CardTitle>Personal</CardTitle></CardHeader><CardContent><dl className="divide-y">
             <Detail label="Phone">{formatPhone(m.phone)}</Detail>
             <Detail label="Gender">{m.gender ? genderLabel[m.gender] : null}</Detail>
-            <Detail label="Date of birth">{m.date_of_birth ? formatDate(m.date_of_birth) : null}</Detail>
-            <Detail label="Address">{m.address}</Detail>
           </dl></CardContent></Card>
           <Card><CardHeader><CardTitle>Notes</CardTitle></CardHeader><CardContent>
             <p className="text-sm whitespace-pre-wrap text-muted-foreground">{m.notes || 'No notes.'}</p>

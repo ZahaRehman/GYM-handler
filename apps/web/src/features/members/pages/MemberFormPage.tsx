@@ -34,7 +34,7 @@ export function MemberFormPage() {
   const defaults: MemberFormValues = member.data
     ? toFormValues(member.data)
     : {
-        full_name: '', phone: '', gender: '', date_of_birth: '', address: '', fee_amount: Number.NaN,
+        full_name: '', phone: '', gender: '', fee_amount: Number.NaN,
         join_date: today, next_due_date: today, notes: '', photo_public_id: null,
         collect_payment: true, payment_method: 'cash', admission_fee: Number.NaN,
       }

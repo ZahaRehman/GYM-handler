@@ -77,14 +77,6 @@ export function MemberForm({ defaultValues, isNew, submitting, currency, onSubmi
               <NativeSelectOption value="other">Other</NativeSelectOption>
             </NativeSelect>
           </FormField>
-          <FormField id="date_of_birth" label="Date of birth" error={errors.date_of_birth?.message}>
-            <Input id="date_of_birth" type="date" className={field} {...register('date_of_birth')} />
-          </FormField>
-          <div className="sm:col-span-2">
-            <FormField id="address" label="Address">
-              <Input id="address" className={field} {...register('address')} />
-            </FormField>
-          </div>
         </CardContent>
       </Card>
 

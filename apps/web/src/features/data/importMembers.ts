@@ -3,9 +3,9 @@ import type { MemberInsert } from '@/features/members/schema'
 import { normalizePhone } from '@/features/members/utils'
 
 /** Columns in the downloadable template, in order. Name, phone and monthly fee are required. */
-export const TEMPLATE_HEADERS = ['full_name', 'phone', 'fee', 'join_date', 'next_due_date', 'gender', 'address', 'notes'] as const
+export const TEMPLATE_HEADERS = ['full_name', 'phone', 'fee', 'join_date', 'next_due_date', 'gender', 'notes'] as const
 
-export const TEMPLATE_EXAMPLE = ['Ali Raza', '0300 1234567', '3000', '2026-01-15', '2026-12-15', 'male', 'Model Town, Lahore', 'Trains evenings']
+export const TEMPLATE_EXAMPLE = ['Ali Raza', '0300 1234567', '3000', '2026-01-15', '2026-12-15', 'male', 'Trains evenings']
 
 // Accept common header spellings from existing spreadsheets.
 const ALIASES: Record<string, (typeof TEMPLATE_HEADERS)[number]> = {
@@ -15,7 +15,6 @@ const ALIASES: Record<string, (typeof TEMPLATE_HEADERS)[number]> = {
   join_date: 'join_date', joined: 'join_date', joining_date: 'join_date', start_date: 'join_date', date_joined: 'join_date',
   next_due_date: 'next_due_date', due_date: 'next_due_date', due: 'next_due_date', next_due: 'next_due_date',
   gender: 'gender', sex: 'gender',
-  address: 'address',
   notes: 'notes', note: 'notes', remarks: 'notes',
 }
 
@@ -98,7 +97,6 @@ export function validateRows(
       join_date: join,
       next_due_date: due,
       gender: gender as MemberInsert['gender'],
-      address: get('address') || null,
       notes: get('notes') || null,
     }
     return { line: i + 2, name: name || '(no name)', payload, errors, warnings }
